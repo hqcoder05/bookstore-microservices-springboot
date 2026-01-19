@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: authors-service
+  config:
+    import: "optional:configserver:http://localhost:8888/"
+
+  # C?u hình "phòng h?" (Fallback) khi không k?t n?i ???c Config Server
+  datasource:
+    url: jdbc:mariadb://localhost:3306/authors_db
+    username: root
+    password: root
+    driver-class-name: org.mariadb.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  cloud:
+    consul:
+      host: localhost
+      port: 8500
+      discovery:
+        service-name: authors-service
+        prefer-ip-address: true
+        # N?u ch?a ch?y Consul thì t?m set false ?? ?? báo l?i rác log
+        # enabled: false

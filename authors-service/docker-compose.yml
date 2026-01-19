@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  # 1. Database cho Authors Service
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    ports:
+      - "3306:3306"
+    environment:
+      - MARIADB_ROOT_PASSWORD=root
+      - MARIADB_DATABASE=authors_db
+    volumes:
+      - mariadb_data:/var/lib/mysql
+
+  # 2. Service Discovery (Cái bạn đang thiếu)
+  consul:
+    image: consul:1.15.4
+    container_name: consul
+    ports:
+      - "8500:8500"
+      - "8600:8600/udp"
+    command: "agent -server -bootstrap -ui -client=0.0.0.0"
+
+  # 3. Distributed Tracing (Zipkin - Có trong kiến trúc của bạn)
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      - "9411:9411"
+
+volumes:
+  mariadb_data:
