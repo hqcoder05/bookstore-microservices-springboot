@@ -26,7 +26,7 @@ import java.util.UUID;
 @EntityListeners(AuditingEntityListener.class) // Tự động điền ngày tạo/sửa
 public class Author {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(nullable = false, updatable = false)
     private UUID uuid;
 

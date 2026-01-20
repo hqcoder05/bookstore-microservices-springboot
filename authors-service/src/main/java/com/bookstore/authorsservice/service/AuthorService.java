@@ -1,7 +1,11 @@
 package com.bookstore.authorsservice.service;
 
+import com.bookstore.authorsservice.dto.request.AuthorCreateRequest;
+import com.bookstore.authorsservice.dto.request.AuthorUpdateRequest;
+import com.bookstore.authorsservice.dto.response.AuthorResponse;
 import com.bookstore.authorsservice.entity.Author;
 import com.bookstore.authorsservice.enums.Status;
+import com.bookstore.authorsservice.mapper.AuthorMapper;
 import com.bookstore.authorsservice.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,36 +26,50 @@ public class AuthorService {
 
     /* ================= READ ================= */
 
-    public Page<Author> getActiveAuthors(Pageable pageable) {
-        return repository.findByStatus(Status.ACTIVE, pageable);
+    public Page<AuthorResponse> getActiveAuthors(Pageable pageable) {
+        return repository.findByStatus(Status.ACTIVE, pageable)
+                .map(AuthorMapper::authorToAuthorResponse);
     }
 
-
-    public Author getAuthorById(UUID uuid) {
+    private Author getActiveAuthorEntity(UUID uuid) {
         return repository.findByUuidAndStatus(uuid, Status.ACTIVE)
-                .orElseThrow(() ->
-                        new RuntimeException("Không tìm thấy tác giả với id: " + uuid));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tác giả"));
+    }
+
+    public AuthorResponse getAuthorById(UUID uuid) {
+        Author author = repository.findByUuidAndStatus(uuid, Status.ACTIVE)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy tác giả"));
+        return AuthorMapper.authorToAuthorResponse(author);
     }
 
     /* ================= CREATE ================= */
 
     @Transactional
-    public Author createAuthor(Author author) {
-        if (repository.existsByFullnameIgnoreCase(author.getFullname())) {
-            throw new RuntimeException("Tác giả đã tồn tại: " + author.getFullname());
+    public AuthorResponse createAuthor(AuthorCreateRequest authorCreateRequest) {
+        if (repository.existsByFullnameIgnoreCase(authorCreateRequest.getFullname())) {
+            throw new RuntimeException("Tác giả đã tồn tại: " + authorCreateRequest.getFullname());
         }
 
-        author.setStatus(Status.ACTIVE);
-        log.info("Tạo tác giả mới: {}", author.getFullname());
+        Author author = Author.builder()
+                .fullname(authorCreateRequest.getFullname())
+                .penName(authorCreateRequest.getPenName())
+                .dateOfBirth(authorCreateRequest.getDateOfBirth())
+                .nationality(authorCreateRequest.getNationality())
+                .biography(authorCreateRequest.getBiography())
+                .avatarUrl(authorCreateRequest.getAvatarUrl())
+                .status(Status.ACTIVE)
+                .verified(false)
+                .build();
 
-        return repository.save(author);
+        return AuthorMapper.authorToAuthorResponse(repository.save(author));
     }
 
     /* ================= UPDATE ================= */
 
     @Transactional
-    public Author updateAuthor(UUID id, Author request) {
-        Author author = getAuthorById(id);
+    public AuthorResponse updateAuthor(UUID uuid, AuthorUpdateRequest request) {
+
+        Author author = getActiveAuthorEntity(uuid);
 
         author.setFullname(request.getFullname());
         author.setPenName(request.getPenName());
@@ -60,20 +78,24 @@ public class AuthorService {
         author.setDateOfDeath(request.getDateOfDeath());
         author.setNationality(request.getNationality());
         author.setAvatarUrl(request.getAvatarUrl());
-        author.setVerified(request.isVerified());
 
-        log.info("Cập nhật tác giả: {}", id);
-        return repository.save(author);
+        if (request.getVerified() != null) {
+            author.setVerified(request.getVerified());
+        }
+
+        log.info("Cập nhật tác giả: {}", uuid);
+        return AuthorMapper.authorToAuthorResponse(repository.save(author));
     }
+
 
     /* ================= DELETE (SOFT) ================= */
 
     @Transactional
-    public void deleteAuthor(UUID id) {
-        Author author = getAuthorById(id);
+    public void deleteAuthor(UUID uuid) {
+        Author author = getActiveAuthorEntity(uuid);
         author.setStatus(Status.INACTIVE);
 
-        log.info("Soft delete tác giả: {}", id);
+        log.info("Soft delete tác giả: {}", uuid);
         repository.save(author);
     }
 }
