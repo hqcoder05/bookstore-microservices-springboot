@@ -1,6 +1,8 @@
 package com.bookstore.authorsservice.controller;
 
-import com.bookstore.authorsservice.entity.Author;
+import com.bookstore.authorsservice.dto.request.AuthorCreateRequest;
+import com.bookstore.authorsservice.dto.request.AuthorUpdateRequest;
+import com.bookstore.authorsservice.dto.response.AuthorResponse;
 import com.bookstore.authorsservice.service.AuthorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -8,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -18,24 +19,26 @@ public class AuthorController {
     private final AuthorService authorService;
 
     @GetMapping
-    public Page<Author> getAll(Pageable pageable) {
+    public Page<AuthorResponse> getAll(Pageable pageable) {
         return authorService.getActiveAuthors(pageable);
     }
 
     @GetMapping("/{uuid}")
-    public Author getById(@PathVariable UUID uuid) {
+    public AuthorResponse getById(@PathVariable UUID uuid) {
         return authorService.getAuthorById(uuid);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Author create(@RequestBody Author author) {
-        return authorService.createAuthor(author);
+    public AuthorResponse create(@RequestBody AuthorCreateRequest authorCreaterequest) {
+        return authorService.createAuthor(authorCreaterequest);
     }
 
     @PutMapping("/{uuid}")
-    public Author update(@PathVariable UUID uuid, @RequestBody Author author) {
-        return authorService.updateAuthor(uuid, author);
+    public AuthorResponse update(
+            @PathVariable UUID uuid,
+            @RequestBody AuthorUpdateRequest authorUpdateRequest) {
+        return authorService.updateAuthor(uuid, authorUpdateRequest);
     }
 
     @DeleteMapping("/{uuid}")
