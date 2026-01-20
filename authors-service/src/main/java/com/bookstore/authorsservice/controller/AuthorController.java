@@ -3,25 +3,28 @@ package com.bookstore.authorsservice.controller;
 import com.bookstore.authorsservice.entity.Author;
 import com.bookstore.authorsservice.service.AuthorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/authors")
+@RequestMapping("/authors")
 @RequiredArgsConstructor
 public class AuthorController {
-    private AuthorService authorService;
+    private final AuthorService authorService;
 
     @GetMapping
-    public List<Author> getAll() {
-        return authorService.getAllAuthors();
+    public Page<Author> getAll(Pageable pageable) {
+        return authorService.getActiveAuthors(pageable);
     }
 
-    @GetMapping("/{id}")
-    public Author getById(@PathVariable Long id) {
-        return authorService.getAuthorById(id);
+    @GetMapping("/{uuid}")
+    public Author getById(@PathVariable UUID uuid) {
+        return authorService.getAuthorById(uuid);
     }
 
     @PostMapping
@@ -30,14 +33,14 @@ public class AuthorController {
         return authorService.createAuthor(author);
     }
 
-    @PutMapping("/{id}")
-    public Author update(@PathVariable Long id, @RequestBody Author author) {
-        return authorService.updateAuthor(id, author);
+    @PutMapping("/{uuid}")
+    public Author update(@PathVariable UUID uuid, @RequestBody Author author) {
+        return authorService.updateAuthor(uuid, author);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{uuid}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable Long id) {
-        authorService.deleteAuthor(id);
+    public void delete(@PathVariable UUID uuid) {
+        authorService.deleteAuthor(uuid);
     }
 }

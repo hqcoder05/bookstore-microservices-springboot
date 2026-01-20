@@ -5,6 +5,8 @@ import com.bookstore.authorsservice.enums.Status;
 import com.bookstore.authorsservice.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +22,15 @@ public class AuthorService {
 
     /* ================= READ ================= */
 
-    public List<Author> getAllAuthors() {
-        return repository.findAll();
+    public Page<Author> getActiveAuthors(Pageable pageable) {
+        return repository.findByStatus(Status.ACTIVE, pageable);
     }
 
-    public Author getAuthorById(UUID id) {
-        return repository.findById(id)
+
+    public Author getAuthorById(UUID uuid) {
+        return repository.findByUuidAndStatus(uuid, Status.ACTIVE)
                 .orElseThrow(() ->
-                        new RuntimeException("Không tìm thấy tác giả với id: " + id));
+                        new RuntimeException("Không tìm thấy tác giả với id: " + uuid));
     }
 
     /* ================= CREATE ================= */

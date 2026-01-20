@@ -14,23 +14,33 @@ import java.util.UUID;
 @Repository
 public interface AuthorRepository extends JpaRepository<Author, UUID> {
 
-    List<Author> findByFullnameContainingIgnoreCase(String fullname);
+    /* ===== EXISTENCE ===== */
 
-    Page<Author> findByFullnameContainingIgnoreCase(
-            String fullname,
-            Pageable pageable
-    );
+    boolean existsByFullnameIgnoreCase(String fullname);
 
     List<Author> findByStatus(Status status);
 
-    Optional<Author> findByUuidAndStatus(UUID uuid, Status status);
+    Page<Author> findByStatus(
+            Status status,
+            Pageable pageable
+    );
 
-    boolean existsByFullnameIgnoreCase(String fullname);
+    Optional<Author> findByUuidAndStatus(
+            UUID uuid,
+            Status status
+    );
 
     List<Author> findByFullnameContainingIgnoreCaseAndStatus(
             String fullname,
             Status status
     );
+
+    Page<Author> findByFullnameContainingIgnoreCaseAndStatus(
+            String fullname,
+            Status status,
+            Pageable pageable
+    );
 }
+
 
 
