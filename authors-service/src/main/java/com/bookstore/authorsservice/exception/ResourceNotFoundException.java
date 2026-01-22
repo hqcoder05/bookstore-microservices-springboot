@@ -1,4 +1,7 @@
-package com.bookstore.authorsservice.Exception;
+package com.bookstore.authorsservice.exception;
 
-public class ResourceNotFoundException {
+public class ResourceNotFoundException extends RuntimeException {
+    public ResourceNotFoundException(String message) {
+        super(message);
+    }
 }
