@@ -4,6 +4,7 @@ import com.bookstore.authorsservice.dto.response.AuthorResponse;
 import com.bookstore.authorsservice.entity.Author;
 
 public class AuthorMapper {
+
     public static AuthorResponse authorToAuthorResponse(Author author) {
         return AuthorResponse.builder()
                 .uuid(author.getUuid())
@@ -13,6 +14,8 @@ public class AuthorMapper {
                 .avatarUrl(author.getAvatarUrl())
                 .biography(author.getBiography())
                 .verified(author.isVerified())
+                .books(null)
                 .build();
     }
 }
+
