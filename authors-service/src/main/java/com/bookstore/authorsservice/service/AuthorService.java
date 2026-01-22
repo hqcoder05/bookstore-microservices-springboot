@@ -1,10 +1,13 @@
 package com.bookstore.authorsservice.service;
 
+import com.bookstore.authorsservice.client.BookClient;
 import com.bookstore.authorsservice.dto.request.AuthorCreateRequest;
 import com.bookstore.authorsservice.dto.request.AuthorUpdateRequest;
 import com.bookstore.authorsservice.dto.response.AuthorResponse;
 import com.bookstore.authorsservice.entity.Author;
 import com.bookstore.authorsservice.enums.Status;
+import com.bookstore.authorsservice.exception.DuplicateResourceException;
+import com.bookstore.authorsservice.exception.ResourceNotFoundException;
 import com.bookstore.authorsservice.mapper.AuthorMapper;
 import com.bookstore.authorsservice.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+
 import java.util.UUID;
 
 @Service
@@ -23,6 +26,9 @@ import java.util.UUID;
 public class AuthorService {
 
     private final AuthorRepository repository;
+
+    //Inject Book vao Service
+    private final BookClient bookClient;
 
     /* ================= READ ================= */
 
@@ -33,13 +39,20 @@ public class AuthorService {
 
     private Author getActiveAuthorEntity(UUID uuid) {
         return repository.findByUuidAndStatus(uuid, Status.ACTIVE)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tác giả"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tác giả"));
     }
 
     public AuthorResponse getAuthorById(UUID uuid) {
-        Author author = repository.findByUuidAndStatus(uuid, Status.ACTIVE)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy tác giả"));
-        return AuthorMapper.authorToAuthorResponse(author);
+        Author author = getActiveAuthorEntity(uuid);
+
+        AuthorResponse authorResponse =
+                AuthorMapper.authorToAuthorResponse(author);
+
+        authorResponse.setBooks(
+                bookClient.getBooksByAuthor(uuid)
+        );
+
+        return authorResponse;
     }
 
     /* ================= CREATE ================= */
@@ -47,7 +60,7 @@ public class AuthorService {
     @Transactional
     public AuthorResponse createAuthor(AuthorCreateRequest authorCreateRequest) {
         if (repository.existsByFullnameIgnoreCase(authorCreateRequest.getFullname())) {
-            throw new RuntimeException("Tác giả đã tồn tại: " + authorCreateRequest.getFullname());
+            throw new DuplicateResourceException("Tác giả đã tồn tại: " + authorCreateRequest.getFullname());
         }
 
         Author author = Author.builder()
