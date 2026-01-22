@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Component
 @Profile({"dev", "test"})
-public class FakeBookClient {
+public class FakeBookClient implements BookClient {
     @Override
     public List<BookResponse> getBooksByAuthor(UUID authorId) {
         return List.of(
