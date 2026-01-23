@@ -4,13 +4,34 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
+    # [FIX] Cấu hình HikariCP để đóng kết nối nhanh hơn khi test xong
+    hikari:
+      connection-timeout: 2000   # Giảm thời gian chờ kết nối (mặc định 30s)
+      validation-timeout: 1000   # Kiểm tra kết nối nhanh hơn
+      maximum-pool-size: 5       # Giảm số lượng connection pool cho test nhẹ hơn
 
   jpa:
     hibernate:
       ddl-auto: create-drop
     show-sql: true
     database-platform: org.hibernate.dialect.H2Dialect
+    open-in-view: false
 
   h2:
     console:
       enabled: true
+
+  cloud:
+    consul:
+      enabled: false
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+    config:
+      enabled: false
+    loadbalancer:
+      enabled: false
+
+  main:
+    banner-mode: off
