@@ -67,7 +67,7 @@ class AuthorControllerTest {
         mockMvc.perform(get("/authors")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].fullname")
+                .andExpect(jsonPath("$.data.content[0].fullname")
                         .value("Nguyễn Nhật Ánh"));
     }
 
@@ -78,7 +78,7 @@ class AuthorControllerTest {
 
         mockMvc.perform(get("/authors/{uuid}", uuid))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.penName").value("NNA"));
+                .andExpect(jsonPath("$.data.penName").value("NNA"));
     }
 
     @Test
@@ -96,7 +96,7 @@ class AuthorControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.fullname")
+                .andExpect(jsonPath("$.data.fullname")
                         .value("Nguyễn Nhật Ánh"));
     }
 
@@ -120,6 +120,6 @@ class AuthorControllerTest {
         doNothing().when(authorService).deleteAuthor(uuid);
 
         mockMvc.perform(delete("/authors/{uuid}", uuid))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 }
